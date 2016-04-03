@@ -1,2 +1,2 @@
-# Dots2Art
-GAE app to choose and publish pictures from any device
+# Dots2art
+GAE application to explore and control autogeneration of pictures

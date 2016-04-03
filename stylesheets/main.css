@@ -1,0 +1,55 @@
+body {
+  font-family: Verdana, Helvetica, sans-serif;
+  background-color: #DDDDDD;
+  font-size: 32px
+}
+
+input {
+  font-family: Verdana, Helvetica, sans-serif;
+  background-color: #FFFFFF;
+  font-size: 64px
+}
+
+textarea {
+  font-family: Verdana, Helvetica, sans-serif;
+  font-size: 64px
+}
+
+td {
+  font-family: Verdana, Helvetica, sans-serif;
+  font-size: 32px
+}
+
+
+.scheduleroutineNA {
+  background-color: #AAAAAA;    
+}
+
+.scheduleroutineOK {
+  background-color: #00FF77;    
+}
+
+.scheduleroutineCOVER {
+  background-color: #00FFAA;    
+}
+
+.scheduleroutineKO {
+  background-color: #FF7700;    
+}
+
+.routinecheck {
+ background-color: #FF3300;    
+}
+
+.routinecheckoptional {
+ background-color: #FFFF00;    
+}
+
+.routineuncheck {
+ background-color: #00FF33;
+}
+
+.lifeyear {
+ background-color: #00FF33;
+}
+
