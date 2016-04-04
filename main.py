@@ -39,10 +39,10 @@ class MainHandler(webapp2.RequestHandler):
             content.append(html("h1","Dashboard"))
             content.append("Now is " + date2string(localnow()))
             content.append("<hr>")
-            content.append(htmltable(htmlrow([buttonformget("/listgenerations","Generations"),buttonformget("/listgenresults","Results"),buttonformget("/logs","Logs"),buttonformget("/export","Exports")])))
+            content.append(htmltable(htmlrow([buttonformget("/listgenerations","Generations"),buttonformget("/logs","Logs"),buttonformget("/export","Exports")])))
             content.append("<hr>")
             content.append(html("h2","Results"))
-            content.append(htmltable(htmlrow([buttonformget("/listgenresultspageattr/like/0","Likes"),buttonformget("/listgenresultspageattr/torender/0","To render"),buttonformget("/listgenresultspageattr/topublish/0","To publish")])))
+            content.append(htmltable(htmlrow([buttonformget("/listgenresults/new","New"),buttonformget("/listgenresults/like","Likes"),buttonformget("/listgenresultspageattr/torender/0","To render"),buttonformget("/listgenresultspageattr/topublish/0","To publish")])))
             content.append("<hr>")
             url_linktext = 'Logout'
             content.append(htmllink(url,url_linktext))

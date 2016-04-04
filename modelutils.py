@@ -35,6 +35,8 @@ def getallgenresults(request,email):
 
 def getgenresultsattr(request,email,attr):
     dict_name = request.request.get('dict_name', USERDICT)
+    if attr == "new":
+        return Genresult.query(ancestor=dict_key(dict_name)).filter(Genresult.email == email).filter(Genresult.like == "No").order(-Genresult.date)
     if attr == "like":
         return Genresult.query(ancestor=dict_key(dict_name)).filter(Genresult.email == email).filter(Genresult.like == "Yes").order(-Genresult.date)
     if attr == "torender":

@@ -12,7 +12,7 @@ from utils            import *
 from timeutils        import *
 
 def genresulthandlers():
-    return [('/listgenresults',              ListGenresults),
+    return [('/listgenresults/(.*)',         ListGenresults),
             ('/listgenresultspageattr/(.*)', ListGenresultsPageAttr),
             ('/mylistgenresults/(.*)',       MyListGenresults),
             ('/addgenresult',                AddGenresult),
@@ -59,18 +59,32 @@ def addrenderresult(request,genresultname,generationname,niter):
     
 # [START ListGenresult]
 class ListGenresults(webapp2.RequestHandler):
-    def get(self):
-        self.response.write('<html><body>')
+    def get(self,attr):
+        content = []
 
         user = users.get_current_user()
         if user:
-            rows = [[genresult.name,genresult.generationname,genresult.imageurl,genresult.like,buttonformget("/viewgenresult/" + genresult.key.urlsafe(),"+"), buttonformpost("/deletegenresult/" + genresult.key.urlsafe(),"Del")] for genresult in getallgenresults(self,user.email())]
-            content = htmltable(htmlrows(rows))
-            self.response.write(LIST_GENRESULT_TEMPLATE % content)
-        else:
-            self.response.write('You must login')
+            content.append(html("h1","Results " + attr))
+            content.append("Now is " + date2string(localnow()))
+            content.append("<hr>")
 
-        self.response.write('</body></html>')
+            query       = getgenresultsattr(self,user.email(),attr)
+            countresult = query.count()
+            results     = [result for result in query]
+            
+            # results = [result for result in query.fetch(9,offset=ipage*9)]
+
+            content.append("Nresults: " + str(countresult))
+            content.append("<hr>")
+            content.append(htmltable(htmlrows( [ [htmllink("/viewgenresult/" + genresult.key.urlsafe(),htmlimage(thumbnailurl(genresult))) for genresult in genresult5] for genresult5 in lsplit(results,3)] ) ) )
+            content.append("<hr>")
+        else:
+            url_linktext = 'Login'
+            content.append(htmllink(url,url_linktext))
+
+        content = htmlcenter(content)
+        writehtmlresponse(self,content)
+
 # [END ListGenresult]
 
 
