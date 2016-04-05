@@ -50,7 +50,12 @@ class MainHandler(webapp2.RequestHandler):
         content = htmlcenter(content)
         writehtmlresponse(self,content)
 
-
+class MyListLikes(webapp2.RequestHandler):
+    def get(self,email):
+        query       = getgenresultsattr(self,email,"like")
+        results     = [result.name for result in query]
+        self.response.write(";".join(results))
+        
 class MyListJobs(webapp2.RequestHandler):
     def get(self,email):
         jobs = []
@@ -64,6 +69,6 @@ class MyListJobs(webapp2.RequestHandler):
 
 
 # handlers = [('/', MainHandler)] + generationhandlers() + genresulthandlers()
-handlers = [('/', MainHandler),('/mylistjobs/(.*)', MyListJobs)] + generationhandlers() + genresulthandlers()
+handlers = [('/', MainHandler),('/mylistjobs/(.*)', MyListJobs),('/mylistlikes/(.*)', MyListLikes)] + generationhandlers() + genresulthandlers()
 
 app = webapp2.WSGIApplication(handlers, debug=True)
