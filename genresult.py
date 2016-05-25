@@ -15,11 +15,11 @@ def genresulthandlers():
     return [('/listgenresults/(.*)',         ListGenresults),
             ('/listgenresultspageattr/(.*)', ListGenresultsPageAttr),
             ('/mylistgenresults/(.*)',       MyListGenresults),
-            ('/addgenresult',                AddGenresult),
-            ('/doaddgenresult',              DoAddGenresult),
             ('/mydoaddgenresult/(.*)',       MyDoAddGenresult),
             ('/deletegenresult/(.*)',        DeleteGenresult),
             ('/viewgenresult/(.*)',          ViewGenresult),
+            ('/editgenresult/(.*)',          EditGenresult),
+            ('/doeditgenresult/(.*)',        DoEditGenresult),
             ('/likegenresult/(.*)/(.*)',     LikeGenresult),
             ('/rendergenresult/(.*)/(.*)',   RenderGenresult),
             ('/dorendergenresult/(.*)',      DoRenderGenresult),
@@ -136,31 +136,31 @@ class MyListGenresults(webapp2.RequestHandler):
 # [END MyListGenresult]
 
 
-# [START AddGenresult]
-class AddGenresult(webapp2.RequestHandler):
-    def get(self):
-        user = users.get_current_user()
+# # [START AddGenresult]
+# class AddGenresult(webapp2.RequestHandler):
+#     def get(self):
+#         user = users.get_current_user()
         
-        if not user == None:
-            content = ADD_GENRESULT_TEMPLATE
-        else:
-            content = 'Sorry, you must login to access this page'
+#         if not user == None:
+#             content = ADD_GENRESULT_TEMPLATE
+#         else:
+#             content = 'Sorry, you must login to access this page'
 
-        self.response.write(htmlbody(content))
-# [END AddGenresult]
+#         self.response.write(htmlbody(content))
+# # [END AddGenresult]
 
-# [START DoAddGenresult]
-class DoAddGenresult(webapp2.RequestHandler):
-    def post(self):
-        genresultname              = self.request.get('genresultname')
-        genresultgenerationname    = self.request.get('genresultgenerationname')
-        genresultscript            = self.request.get('genresultscript')
-        genresultimageurl          = self.request.get('genresultimageurl')
-        genresult = addgenresult(self,genresultname,genresultgenerationname,genresultimageurl,users.get_current_user().email())
-        self.redirect("/listgenresults")
-# [END DoAddChiChar]
+# # [START DoAddGenresult]
+# class DoAddGenresult(webapp2.RequestHandler):
+#     def post(self):
+#         genresultname              = self.request.get('genresultname')
+#         genresultgenerationname    = self.request.get('genresultgenerationname')
+#         genresultscript            = self.request.get('genresultscript')
+#         genresultimageurl          = self.request.get('genresultimageurl')
+#         genresult = addgenresult(self,genresultname,genresultgenerationname,genresultimageurl,users.get_current_user().email())
+#         self.redirect("/listgenresults")
+# # [END DoAddChiChar]
 
-# [START DoAddGenresult]
+# [START MyDoAddGenresult]
 class MyDoAddGenresult(webapp2.RequestHandler):
     def post(self,email):
         genresultname              = self.request.get('genresultname')
@@ -169,7 +169,7 @@ class MyDoAddGenresult(webapp2.RequestHandler):
         genresultscript            = self.request.get('genresultscript')
         genresult = addgenresult(self,genresultname,genresultgenerationname,genresultimageurl,genresultscript,email)
         self.redirect("/listgenresults")
-# [END DoAddChiChar]
+# [END MyDoAddGenresult]
 
 
 def deletegenresult(request,genresultid):
@@ -199,14 +199,15 @@ class ViewGenresult(webapp2.RequestHandler):
             genresult = genresult_key.get()
 
             content.append(html("h1","Description"))
-            content.append(htmltable( htmlrows( [ ["Name", genresult.name],["Generation", genresult.generationname],["Image", genresult.imageurl],["Like", genresult.like], ["Render Status", genresult.renderstatus], ["-- Script", genresult.script], ["-- Niter", genresult.renderniter], ["Publish Status", genresult.publishstatus],["-- Title", genresult.publishtitle],["-- Description", genresult.publishdescription], ["-- Categories", genresult.publishcategories], ["-- Tags", genresult.publishtags] ])))
+            content.append(htmltable( htmlrows( [ ["Name", genresult.name],["Generation", genresult.generationname],["Image", genresult.imageurl],["Like", genresult.like], ["Render Status", genresult.renderstatus], ["-- Script", genresult.script], ["-- Niter", genresult.renderniter], ["-- Size", str(genresult.rendersize)], ["Publish Status", genresult.publishstatus],["-- Title", genresult.publishtitle],["-- Description", genresult.publishdescription], ["-- Categories", genresult.publishcategories], ["-- Tags", genresult.publishtags] ])))
             # content.append(buttonformget())
 
             likevalue    = iff(genresult.like          == "Yes", "No", "Yes")
             rendervalue  = iff(genresult.renderstatus  == "TODO", "",  "TODO")
             publishvalue = iff(genresult.publishstatus == "TODO", "",  "TODO")
 
-            content.append(htmltable(htmlrow( [buttonformpost("/likegenresult/" + genresult.key.urlsafe()  + "/" + likevalue,"Like"), 
+            content.append(htmltable(htmlrow( [buttonformpost("/likegenresult/" + genresult.key.urlsafe()  + "/" + likevalue,"Like"),
+                                               buttonformget("/editgenresult/" + genresult.key.urlsafe(),"Edit"),
                                                buttonformget("/rendergenresult/" + genresult.key.urlsafe() + "/" + rendervalue,"Render"),
                                                buttonformget("/publishgenresult/" + genresult.key.urlsafe()+ "/" + publishvalue ,"Publish"),buttonformget("/listgenresults","List"), buttonformget("/","Home")])))
             content.append("<hr>")
@@ -215,6 +216,40 @@ class ViewGenresult(webapp2.RequestHandler):
 
         writehtmlresponse(self,content)
 
+        
+class EditGenresult(webapp2.RequestHandler):
+    def get(self,genresultid):
+
+        content = []
+        user = users.get_current_user()
+        if user:
+            dict_name      = self.request.get('dict_name',USERDICT)
+            genresult_key = ndb.Key(urlsafe=genresultid)
+            genresult = genresult_key.get()
+
+            content.append(html("h1","Edit Genresult " + genresult.name))
+            content.append(htmlform("/doeditgenresult/" + genresult.key.urlsafe(), 
+                                        [genresult.name, htmltextarea("genresultscript",genresult.script)], 
+                                        "Submit"))
+
+        writehtmlresponse(self,content)
+
+class DoEditGenresult(webapp2.RequestHandler):
+    def post(self,genresultid):
+        user = users.get_current_user()
+        if user:
+            dict_name      = self.request.get('dict_name',USERDICT)
+            genresult_key = ndb.Key(urlsafe=genresultid)
+            genresult = genresult_key.get()
+
+            newscript =  self.request.get('genresultscript')
+
+            genresult.script = newscript
+            genresult.put()
+
+        self.redirect("/viewgenresult/" + genresultid)
+
+        
 # [START ViewGenresult]
 class LikeGenresult(webapp2.RequestHandler):
     def post(self,genresultid,newvalue):
@@ -243,7 +278,7 @@ class RenderGenresult(webapp2.RequestHandler):
 
             if newvalue == "TODO":
                 content.append(htmlform("/dorendergenresult/" + genresult.key.urlsafe(), 
-                                        [genresult.name, htmltextarea("renderniter","150000")], 
+                                        [genresult.name, htmltextarea("renderniter","150000"),htmltextarea("rendersize","1000")], 
                                         "Submit"))
                 
                 writehtmlresponse(self,content)
@@ -267,9 +302,11 @@ class DoRenderGenresult(webapp2.RequestHandler):
             genresult = genresult_key.get()
 
             niter = self.request.get('renderniter')
+            size  = self.request.get('rendersize')
 
             genresult.renderstatus = "TODO"
             genresult.renderniter  = niter
+            genresult.rendersize   = size
             genresult.put()
 
         self.redirect("/viewgenresult/" + genresultid)

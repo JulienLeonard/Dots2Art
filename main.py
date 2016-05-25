@@ -23,7 +23,7 @@ from htmlutils     import *
 from modelutils    import *
 from timeutils     import *
 # import pytz
-
+import json
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
@@ -60,15 +60,23 @@ class MyListJobs(webapp2.RequestHandler):
     def get(self,email):
         jobs = []
         jobs = jobs + [["publish",genresult.name,str(genresult.publishtitle),str(genresult.publishdescription),str(genresult.publishcategories).replace(",","."),str(genresult.publishtags).replace(",",".")] for genresult in getgenresultstopublish(self,email)]
-        jobs = jobs + [["render",genresult.name,str(genresult.script),str(genresult.renderniter)]          for genresult  in getgenresultstorender(self,email)]
+        jobs = jobs + [["render",genresult.name,str(genresult.script),str(genresult.renderniter),str(genresult.rendersize)]          for genresult  in getgenresultstorender(self,email)]
         jobs = jobs + [["generation",generation.name,generation.script,generation.niter,generation.status] for generation in getgenerationstodo(self,email)]
         jobs = [",".join(job) for job in jobs]
         self.response.write(";".join(jobs))
 
-            
+class ExportHandler(webapp2.RequestHandler):
+   def get(self):
+       user =  users.get_current_user()
+       email = user.email()
+       generations = getallgenerations(self,email)
+       genresults  = getallgenresults(self,email)
+
+       self.response.headers['Content-Type'] = 'application/json'   
+       self.response.out.write([p.to_dict() for p in generations] + [p.to_dict() for p in genresults])
 
 
 # handlers = [('/', MainHandler)] + generationhandlers() + genresulthandlers()
-handlers = [('/', MainHandler),('/mylistjobs/(.*)', MyListJobs),('/mylistlikes/(.*)', MyListLikes)] + generationhandlers() + genresulthandlers()
+handlers = [('/', MainHandler),('/export', ExportHandler),('/mylistjobs/(.*)', MyListJobs),('/mylistlikes/(.*)', MyListLikes)] + generationhandlers() + genresulthandlers()
 
 app = webapp2.WSGIApplication(handlers, debug=True)
