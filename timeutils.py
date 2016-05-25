@@ -63,3 +63,9 @@ def dateparse(sdate):
 
 def daterangemiddle(daterange):
     return daterange[0] + (daterange[1] - daterange[0])/2 
+
+def datedump(date):
+    return date.strftime("%d %b %Y %H:%M:%S")
+
+def datedumponly(date):
+    return date.strftime("%d %b %Y")

@@ -39,7 +39,7 @@ class MainHandler(webapp2.RequestHandler):
             content.append(html("h1","Dashboard"))
             content.append("Now is " + date2string(localnow()))
             content.append("<hr>")
-            content.append(htmltable(htmlrow([buttonformget("/listgenerations","Generations"),buttonformget("/logs","Logs"),buttonformget("/export","Exports")])))
+            content.append(htmltable(htmlrow([buttonformget("/listgenerations","Generations"),buttonformget("/logs","Logs"),buttonformget("/export/","Exports")])))
             content.append("<hr>")
             content.append(html("h2","Results"))
             content.append(htmltable(htmlrow([buttonformget("/listgenresults/new","New"),buttonformget("/listgenresults/like","Likes"),buttonformget("/listgenresultspageattr/torender/0","To render"),buttonformget("/listgenresultspageattr/topublish/0","To publish")])))
@@ -66,17 +66,24 @@ class MyListJobs(webapp2.RequestHandler):
         self.response.write(";".join(jobs))
 
 class ExportHandler(webapp2.RequestHandler):
-   def get(self):
-       user =  users.get_current_user()
-       email = user.email()
+   def get(self,email = None):
+       if len(email) == 0:
+           user  = users.get_current_user()
+           email = user.email()
        generations = getallgenerations(self,email)
        genresults  = getallgenresults(self,email)
 
-       self.response.headers['Content-Type'] = 'application/json'   
-       self.response.out.write([p.to_dict() for p in generations] + [p.to_dict() for p in genresults])
+       content = []
+       content.append("* Generations")
+       for generation in generations:
+           content.append(generation.string())
+       content.append("* Generesults")
+       for genresult in genresults:
+           content.append(genresult.string())
+       self.response.write("\n".join(content))
 
 
 # handlers = [('/', MainHandler)] + generationhandlers() + genresulthandlers()
-handlers = [('/', MainHandler),('/export', ExportHandler),('/mylistjobs/(.*)', MyListJobs),('/mylistlikes/(.*)', MyListLikes)] + generationhandlers() + genresulthandlers()
+handlers = [('/', MainHandler),('/export/(.*)', ExportHandler),('/mylistjobs/(.*)', MyListJobs),('/mylistlikes/(.*)', MyListLikes)] + generationhandlers() + genresulthandlers()
 
 app = webapp2.WSGIApplication(handlers, debug=True)
