@@ -105,11 +105,12 @@ class ListGenresultsPageAttr(webapp2.RequestHandler):
 
             # results = [result for result in getgenresultsattr(self,user.email(),attr)]
             ipage   = int(page)
-            results = [result for result in query.fetch(9,offset=ipage*9)]
+            npicperpage = 50
+            results = [result for result in query.fetch(npicperpage,offset=ipage*npicperpage)]
 
             content.append("Nresults: " + str(countresult))
             content.append("<hr>")
-            content.append("Results indices: " + str(ipage*9) + " -> " + str((ipage+1)*9))
+            content.append("Results indices: " + str(ipage*npicperpage) + " -> " + str((ipage+1)*npicperpage))
             content.append(htmltable(htmlrows( [ [htmllink("/viewgenresult/" + genresult.key.urlsafe(),htmlimage(thumbnailurl(genresult))) for genresult in genresult5] for genresult5 in lsplit(results,3) ] ) ) )
             content.append("<hr>")
             if ipage == 0:
